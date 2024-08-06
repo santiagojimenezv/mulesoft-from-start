@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="resources-ids:get-next-articleId" doc:id="712bcf2c-a902-4bc3-8da8-21d0f5966b78" >
+		<os:retrieve doc:name="nextArticleId" doc:id="6d555041-94c0-46b7-a6f7-637628fd5c8f" key="#[Mule::p('os.next.articleId')]" objectStore="Object_store" target="nextArticleId">
+			<os:default-value ><![CDATA[#[output application/json --- 1]]]></os:default-value>
+		</os:retrieve>
+		<os:store doc:name="nextArticleId + 1" doc:id="ad2f38a4-3bd4-444f-94e4-9eed14509b47" key="#[Mule::p('os.next.articleId')]" objectStore="Object_store">
+			<os:value ><![CDATA[#[output application/json --- vars.nextArticleId + 1]]]></os:value>
+		</os:store>
+	</sub-flow>
+</mule>

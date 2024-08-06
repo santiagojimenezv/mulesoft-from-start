@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<sub-flow name="resources-comments:read-all-comments-from-an-article" doc:id="b2ce6480-c29b-4173-9dfc-6a8522b8ea69" >
+		<ee:transform doc:name="articleId">
+            <ee:variables>
+                <ee:set-variable variableName="articleId">attributes.uriParams.'articleId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+	<sub-flow name="resources-comments:read-one-comment-from-an-article" doc:id="91c96e70-eecb-4005-92bc-8d8da3880ab9" >
+		<ee:transform doc:name="commentId &amp; articleId">
+            <ee:variables>
+                <ee:set-variable variableName="articleId">attributes.uriParams.'articleId'</ee:set-variable>
+                <ee:set-variable variableName="commentId">attributes.uriParams.'commentId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+	<sub-flow name="resources-comments:create-one-comment-in-an-article" doc:id="1c521e94-3df7-43d0-87e9-605a5067ec9e" >
+		<ee:transform doc:name="articleId">
+            <ee:variables>
+                <ee:set-variable variableName="articleId">attributes.uriParams.'articleId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+	<sub-flow name="resources-comments:update-one-comment-from-an-article" doc:id="c02e1025-b645-4582-8051-694004ae3f7c" >
+		<ee:transform doc:name="commentId &amp; articleId">
+            <ee:variables>
+                <ee:set-variable variableName="articleId">attributes.uriParams.'articleId'</ee:set-variable>
+                <ee:set-variable variableName="commentId">attributes.uriParams.'commentId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+	<sub-flow name="resources-comments:delete-one-comment-from-an-article" doc:id="d895c3c0-9ea2-4154-ae6e-25d990959ab5" >
+		<ee:transform doc:name="commentId &amp; articleId">
+            <ee:variables>
+                <ee:set-variable variableName="articleId">attributes.uriParams.'articleId'</ee:set-variable>
+                <ee:set-variable variableName="commentId">attributes.uriParams.'commentId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+</mule>

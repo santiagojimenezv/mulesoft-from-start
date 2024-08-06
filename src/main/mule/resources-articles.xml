@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<sub-flow name="resources-articles:retrieve-all-articles" doc:id="f8ff6b6b-e055-4597-b185-afa121bd7c94">
+		<os:retrieve doc:name="articles" doc:id="3f691ce6-0976-4312-a47e-fb9190f161d1" key="#[Mule::p('os.articles')]" objectStore="Object_store" target="articles">
+            <os:default-value><![CDATA[#[output application/json --- []]]]></os:default-value>
+        </os:retrieve>
+	</sub-flow>
+	<sub-flow name="resources-articles:store-articles" doc:id="f06887fd-2dfa-48a2-9a08-c89dd9fba251" >
+		<os:store doc:name="articles" doc:id="e7b33b6b-9ebd-4052-ba55-b52a17819583" key="#[Mule::p('os.articles')]" objectStore="Object_store" />
+	</sub-flow>
+	<sub-flow name="resources-articles:get-articleId-variable" doc:id="cb42d607-51ca-4d40-bb87-d465cc9dee5d" >
+		<ee:transform doc:name="articleId" doc:id="6ac342a5-0a3c-4233-9b85-355bd782823e" >
+			<ee:variables >
+				<ee:set-variable variableName="articleId" ><![CDATA[attributes.uriParams.'articleId' as Number]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="resources-articles:read-all-articles" doc:id="23ca7071-ff3c-4515-87da-765afeb869f2" >
+		<logger level="INFO" message="Starting resources-articles:read-all-articles" doc:name="START" />
+		<flow-ref doc:name="retrieve articles" doc:id="8ff639e3-12f7-4fd6-95c7-cebaf0dd3a5a" name="resources-articles:retrieve-all-articles" />
+		<set-payload value="#[vars.articles]" doc:name="vars.articles" doc:id="3b943d36-b066-4e92-96ee-ada2e3fbbfc3" />
+		<logger level="INFO" doc:name="END" doc:id="06052dfe-c97e-4092-936d-a1d124bd2577" message="Ending resources-articles:read-all-articles" />
+	</sub-flow>
+	<sub-flow name="resources-articles:read-one-article" doc:id="a52faac5-c370-4ad2-ae7e-7da94ab99ac0" >
+		<logger level="INFO" doc:name="START" doc:id="378c387f-e9d1-4ae1-b811-8159830e0f44" message="Starting resources-articles:read-one-article" />
+		<flow-ref doc:name="articleId" doc:id="d1a32e12-fa8a-42fe-b748-ad347a086ac3" name="resources-articles:get-articleId-variable"/>
+		<flow-ref doc:name="retrieve articles" doc:id="152e67b4-40b7-4996-9aa8-ca6b2e3ec659" name="resources-articles:retrieve-all-articles" />
+		<ee:transform doc:name="filter articles by articleId" doc:id="22ebd225-f7e9-4dc9-8619-fc3ff81b4e91" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(vars.articles filter ($.id == vars.articleId))[0] default {}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="check 404 error" doc:id="c30f740f-d247-4cfc-ba5f-173c17c20f62" name="common:check-404" />
+		<logger level="INFO" doc:name="END" doc:id="04739a4b-6bc8-4328-b7fe-acae81a7aa8b" message="Ending resources-articles:read-one-article" />
+	</sub-flow>
+	<sub-flow name="resources-articles:create-one-article" doc:id="bf7a81a9-aacd-4e40-9d96-4373a0965f6f" >
+		<logger level="INFO" message="Starting resources-articles:create-one-article" doc:name="START" />
+        <flow-ref doc:name="get next articleId" doc:id="537db3ec-d2e4-46e3-9c78-59c601949bd7" name="resources-ids:get-next-articleId"/>
+		<flow-ref doc:name="retrieve articles" doc:id="dde21d2e-9406-4af1-88ec-22324c071ca9" name="resources-articles:retrieve-all-articles"/>
+		<async doc:name="Async" doc:id="3b645b3f-924c-4f92-a808-2294ad7eff57" >
+			<ee:transform doc:name="get category" doc:id="16e59cad-5220-4296-8de6-37fe2982cc07" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[payload.category]]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="create or update categories" doc:id="044ed5b9-a2d3-4a5f-aff7-fc3c65a6bebc" name="resources-categories:create-or-update-categories"/>
+		</async>
+		<ee:transform doc:name="update newArticle with new ID" doc:id="6564cd3e-7eb8-45e3-9698-d1b390799436">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="newArticle"><![CDATA[%dw 2.0
+output application/json
+import update from dw::util::Values
+---
+payload update "id" with vars.nextArticleId]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="append new article to articles" doc:id="c77b3e2d-60bb-41ea-b846-e7407271fa74">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.articles + vars.newArticle]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<flow-ref doc:name="store articles" doc:id="b44ebc26-e7b8-4c93-9540-7ff5960e99dd" name="resources-articles:store-articles" />
+		<set-payload value="#[vars.newArticle]" doc:name="newArticle" doc:id="60a54335-cc92-4ced-b35c-a698104c11c4" />
+		<logger level="INFO" doc:name="END" doc:id="67ad0cde-cfdc-4ecc-ab4b-b83d557abb62" message="Ending resources-articles:create-one-article" />
+	</sub-flow>
+	<sub-flow name="resources-articles:update-one-article" doc:id="38e0454c-9302-43f2-bc8a-e080794f0a4f" >
+		<logger level="INFO" doc:name="START" doc:id="5b917402-d771-4e24-b8da-5620a3237c94" message="Starting resources-articles:update-one-article" />
+		<flow-ref doc:name="articleId" doc:id="dcbb5462-8f64-4727-9273-9ecd8912723d" name="resources-articles:get-articleId-variable"/>
+		<flow-ref doc:name="retrieve articles" doc:id="9afd4478-77b0-4a2c-aef3-996df99a8ded" name="resources-articles:retrieve-all-articles" />
+		<ee:transform doc:name="update articles by articleId" doc:id="145e79f5-6e43-4fc2-b8b3-7bb2d974edc8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.articles map (
+    if ($.id == vars.articleId)
+        payload
+    else $
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="store articles" doc:id="67fe2809-cd6d-4fbb-9675-7eab5a8af641" name="resources-articles:store-articles" />
+		<ee:transform doc:name="filter payload by articleId" doc:id="9e5721b4-2ede-4e21-af09-8b4b74a4b23e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+(payload filter ($.id == vars.articleId))[0] default {}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="check 404 error" doc:id="c8d907fa-f9fd-4cbd-ba7e-19ee0018ad72" name="common:check-404" />
+		<logger level="INFO" doc:name="END" doc:id="457e8895-3a4a-406a-bc15-012f3b55ced6" message="Ending resources-articles:update-one-article" />
+	</sub-flow>
+	<sub-flow name="resources-articles:delete-one-article" doc:id="ba4f4f21-7a80-454d-9e58-bd6737549bf5" >
+		<logger level="INFO" doc:name="START" doc:id="b5ada9fd-2089-400c-a3b3-46450ff85979" message="Starting resources-articles:delete-one-article" />
+		<flow-ref doc:name="articleId" doc:id="7c6a2069-73ab-436b-88bf-ad61933e4019" name="resources-articles:get-articleId-variable"/>
+		<flow-ref doc:name="retrieve articles" doc:id="c14c832b-9b6c-46e8-804f-fa3aa25eb6d6" name="resources-articles:retrieve-all-articles" />
+		<ee:transform doc:name="filter by not articleId" doc:id="01582101-80b9-4ba8-ae20-947a8a8125d6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.articles default [] filter ($.id != vars.articleId)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="store articles" doc:id="5222ab0b-112c-4e54-a61f-8eb0f48cfa91" name="resources-articles:store-articles" />
+		<logger level="INFO" doc:name="END" doc:id="e3a1b4e0-0adf-4362-ab56-00dd2a04342f" message="Ending resources-articles:delete-one-article" />
+	</sub-flow>
+</mule>

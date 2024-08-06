@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<sub-flow name="resources-writers:read-all-writers" doc:id="553016e8-4704-4545-8694-5e9fd4209b9b" >
+		<logger level="INFO" doc:name="Logger" doc:id="e45db3ca-a9b4-4142-bbfb-e503e89e0139" />
+	</sub-flow>
+	<sub-flow name="resources-writers:read-one-writer" doc:id="205bec1f-fd2a-4255-abd6-a5caab60fe6f" >
+		<ee:transform doc:name="writerId">
+            <ee:variables>
+                <ee:set-variable variableName="writerId">attributes.uriParams.'writerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+	<sub-flow name="resources-writers:create-one-writer" doc:id="8f66ea6e-ed08-4883-8670-8dd798b1a08c" >
+		<logger level="INFO" doc:name="Logger" doc:id="51552d93-9618-4230-b69a-e57ceb9c7d35" />
+	</sub-flow>
+	<sub-flow name="resources-writers:update-one-writer" doc:id="312c70fb-c124-4d06-939c-a274e1b9e559" >
+		<ee:transform doc:name="writerId">
+            <ee:variables>
+                <ee:set-variable variableName="writerId">attributes.uriParams.'writerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+	<sub-flow name="resources-writers:delete-one-writer" doc:id="f762f12c-25b2-4114-930c-3c6c4d85a731" >
+		<ee:transform doc:name="writerId">
+            <ee:variables>
+                <ee:set-variable variableName="writerId">attributes.uriParams.'writerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+	</sub-flow>
+</mule>
